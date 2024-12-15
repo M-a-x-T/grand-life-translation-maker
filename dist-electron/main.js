@@ -1,11 +1,12 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
-import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
+import {app, BrowserWindow, dialog, ipcMain} from "electron";
+import {createRequire} from "node:module";
+import {fileURLToPath} from "node:url";
 import path$1 from "node:path";
 import fs$1 from "fs";
 import require$$1 from "path";
 import require$$2 from "os";
 import require$$3 from "crypto";
+
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -463,7 +464,8 @@ ipcMain.handle("fetch", async (_event, { url, options }) => {
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status}`);
+      console.log(`HTTP Error: ${response.status}`);
+      return {success: false, error: response.status};
     }
     const data = await response.json();
     return { success: true, data };

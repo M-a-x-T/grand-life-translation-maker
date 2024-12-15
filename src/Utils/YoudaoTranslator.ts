@@ -2,7 +2,9 @@
 import BaseTranslator from "./BaseTranslator.ts";
 
 export default class YoudaoTranslator extends BaseTranslator {
+    // noinspection JSUnusedLocalSymbols
     private readonly appKey: string;
+    // noinspection JSUnusedLocalSymbols
     private readonly appSecret: string;
 
     constructor(appKey: string, appSecret: string) {
