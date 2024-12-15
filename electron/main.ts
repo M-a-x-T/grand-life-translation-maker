@@ -169,7 +169,8 @@ ipcMain.handle("fetch", async (_event, {url, options}) => {
     try {
         const response = await fetch(url, options);
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
+            console.log(`HTTP Error: ${response.status}`);
+            return {success: false, error: response.status};
         }
         const data = await response.json();
         return {success: true, data};
