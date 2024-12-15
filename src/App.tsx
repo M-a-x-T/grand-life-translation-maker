@@ -354,8 +354,6 @@ export default function App() {
 
         // get translation
         translator.translate(item.originVersion, "en", projectConfig.Language).then((res) => {
-            console.log("result: " + res)
-
             fileData.Datas.set(item.key, {
                 ...item,
                 machineTranslate: res
@@ -495,7 +493,7 @@ export default function App() {
             <Row gutter={24}>
                 <Col span={8}>
                     <Statistic title="Need translate"
-                               value={filteredDataSource.filter((item) => !item.isComplete).length}/>
+                               value={filteredDataSource.filter((item) => !item.isComplete).filter((item) => !item.isIgnore).length}/>
                 </Col>
                 <Col span={8}>
                     <Statistic title="Completed"
@@ -523,13 +521,15 @@ export default function App() {
                 bordered
                 dataSource={filteredDataSource.filter(
                     (item) => ((
-                                searchText === "" ||
-                                item.key.includes(searchText) ||
-                                (item.originVersion !== undefined && item.originVersion.includes(searchText)) ||
-                                (item.translateVersion !== undefined && item.translateVersion.includes(searchText))
-                            )
-                            && (searchComplete ? true : !item.isComplete))
+                            (searchComplete ? true : !item.isComplete))
                         && (searchIgnore ? true : !item.isIgnore)
+                        && (
+                            searchText === "" ||
+                            item.key.toLowerCase().includes(searchText.toLowerCase()) || // 忽略大小写
+                            (item.originVersion !== undefined && item.originVersion.toLowerCase().includes(searchText.toLowerCase())) || // 忽略大小写
+                            (item.translateVersion !== undefined && item.translateVersion.toLowerCase().includes(searchText.toLowerCase())) // 忽略大小写
+                        )
+                    )
                 )}
                 columns={columns}
                 sticky

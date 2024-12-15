@@ -1,7 +1,8 @@
 ﻿import {ReactNode, useContext, useEffect, useRef, useState} from "react";
-import {Form, Input, InputRef} from "antd";
+import {Form, InputRef} from "antd";
 import {EditableContext} from "./EditableContext.ts";
 import DataSourceItem from "../Interfaces/DataSourceItem.ts";
+import TextArea from "antd/es/input/TextArea";
 
 export default function EditableCell({title, editable, children, dataIndex, record, handleSave, ...restProps}: {
     title: string,
@@ -55,7 +56,7 @@ export default function EditableCell({title, editable, children, dataIndex, reco
                     message: `${title} is required.`,
                 }]}
             >
-                <Input ref={inputRef} onPressEnter={save} onBlur={save}/>
+                <TextArea rows={8} ref={inputRef} onPressEnter={save} onBlur={save}/>
             </Form.Item>
         ) : (
             <div className="editable-cell-value-wrap" onClick={toggleEdit}>

@@ -155,18 +155,18 @@ export default class FileData {
                     return;
                 }
 
-                Object.entries(jsonObject.xml[value.category]).forEach(([key, item]) => {
+                Object.entries(jsonObject.xml[value.category]).forEach(([key, item]: [unknown, unknown]) => {
                     if (value.textPath === undefined) {
-                        console.warn("Text path not found: " + value.key)
+                        console.warn("Text path not found: " + value.key + " " + key)
                         return;
                     }
                     const path = value.textPath.split("\\")
-                    if (path[0] === undefined || path[0] !== key) {
+                    let curRoot = item as any
+                    if (path[0] === undefined || path[0] !== curRoot.id.toString()) {
                         return
                     }
 
                     let pathIndex = 1
-                    let curRoot = item as any
                     while (pathIndex < path.length - 1) {
                         if (curRoot[path[pathIndex]] === undefined) {
                             return
