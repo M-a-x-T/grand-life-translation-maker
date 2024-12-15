@@ -1,5 +1,5 @@
 import './App.css';
-import {Button, Checkbox, Divider, Input as AntdInput, message, Table} from "antd";
+import {Button, Checkbox, Col, Divider, Input as AntdInput, message, Row, Statistic, Table} from "antd";
 import React, {useRef, useState} from "react";
 import EditableCell from "./Components/EditableCell.tsx";
 import EditableRow from "./Components/EditableRow.tsx";
@@ -311,10 +311,14 @@ export default function App() {
             return;
         }
 
-        fileData.Datas.set(item.key, {
-            ...item,
-            [propertyName]: checked
-        });
+        if (fileData.Datas.get(item.key)) {
+            fileData.Datas.set(item.key, {
+                ...item,
+                [propertyName]: checked
+            });
+        } else {
+            console.error("Failed to find item in file data")
+        }
         setProjectConfig({
             ...projectConfig
         })
@@ -386,6 +390,19 @@ export default function App() {
         })
     };
 
+    const handleSearchOperationChange = async (item: DataSourceItem) => {
+        if (!projectConfig) {
+            return;
+        }
+
+        const fileData = projectConfig.Translations.get(item.sourceFile) as FileData;
+        if (!fileData) {
+            return;
+        }
+
+        setSearchText(item.originVersion)
+    };
+
     const handleCompleteSearchChanged = (e: CheckboxChangeEvent) => {
         setSearchComplete(e.target.checked);
     };
@@ -409,16 +426,7 @@ export default function App() {
             data.Datas.forEach((item) => datas.push(item))
         })
 
-        return datas.filter(
-            (item) => ((
-                        searchText === "" ||
-                        item.key.includes(searchText) ||
-                        (item.originVersion !== undefined && item.originVersion.includes(searchText)) ||
-                        (item.translateVersion !== undefined && item.translateVersion.includes(searchText))
-                    )
-                    && (searchComplete ? true : !item.isComplete))
-                && (searchIgnore ? true : !item.isIgnore)
-        ).sort((a, b) => {
+        return datas.sort((a, b) => {
             let aScore = a.isComplete ? 0 : 1000
             let bScore = b.isComplete ? 0 : 1000
             aScore += a.isIgnore ? 0 : 500
@@ -440,7 +448,8 @@ export default function App() {
         (item, checked) => handlePropertyCheckChange(item, checked, "isComplete"),
         (item, checked) => handlePropertyCheckChange(item, checked, "isIgnore"),
         handleTransOperationChange,
-        handleUseTransOperationChange
+        handleUseTransOperationChange,
+        handleSearchOperationChange
     ).map((col) => {
         if (!col.editable) {
             return col;
@@ -483,6 +492,22 @@ export default function App() {
                 <Button onClick={() => handleExportTrans(false)}>Export to Game</Button>
             </div>
             <Divider/>
+            <Row gutter={24}>
+                <Col span={8}>
+                    <Statistic title="Need translate"
+                               value={filteredDataSource.filter((item) => !item.isComplete).length}/>
+                </Col>
+                <Col span={8}>
+                    <Statistic title="Completed"
+                               value={filteredDataSource.filter((item) => item.isComplete).length}
+                               valueStyle={{color: "#52c41a"}}
+                    />
+                </Col>
+                <Col span={8}>
+                    <Statistic title="Ignored" value={filteredDataSource.filter((item) => item.isIgnore).length}/>
+                </Col>
+            </Row>
+            <Divider/>
             <Checkbox onChange={handleCompleteSearchChanged}>Show Completed</Checkbox>
             <Checkbox onChange={handleIgnoreSearchChanged}>Show Ignored</Checkbox>
             <AntdInput
@@ -490,12 +515,22 @@ export default function App() {
                 value={searchText}
                 onChange={handleSearch}
                 style={{marginBottom: 16}}
+                allowClear
             />
             <Table
                 components={components}
                 rowClassName={() => 'editable-row'}
                 bordered
-                dataSource={filteredDataSource}
+                dataSource={filteredDataSource.filter(
+                    (item) => ((
+                                searchText === "" ||
+                                item.key.includes(searchText) ||
+                                (item.originVersion !== undefined && item.originVersion.includes(searchText)) ||
+                                (item.translateVersion !== undefined && item.translateVersion.includes(searchText))
+                            )
+                            && (searchComplete ? true : !item.isComplete))
+                        && (searchIgnore ? true : !item.isIgnore)
+                )}
                 columns={columns}
                 sticky
                 size={"large"}

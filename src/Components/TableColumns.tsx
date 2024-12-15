@@ -5,7 +5,8 @@ export default function TableColumns(
     handleCheckboxChange: (key: DataSourceItem, checked: boolean) => void,
     handleIgnoreChange: (key: DataSourceItem, checked: boolean) => void,
     handleTransOperation: (key: DataSourceItem) => void,
-    handleUseTransOperation: (key: DataSourceItem) => void
+    handleUseTransOperation: (key: DataSourceItem) => void,
+    handleSearchOperation: (key: DataSourceItem) => void
 ) {
     return [
         {
@@ -86,6 +87,18 @@ export default function TableColumns(
                                 }
                             >
                                 Use Trans
+                            </Button>
+                            <Button
+                                type="text"
+                                onClick={() => handleSearchOperation(record)
+                                }
+                                style={
+                                    {
+                                        marginRight: 8
+                                    }
+                                }
+                            >
+                                Search
                             </Button>
                         </div>
         },

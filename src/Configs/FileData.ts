@@ -70,8 +70,9 @@ export default class FileData {
                     }
 
                     if (value.desc !== undefined && value.desc["@_name"] !== undefined) {
-                        this.Datas.set(key, {
-                            key: (oriItem !== null && oriItem.desc !== undefined ? oriItem.desc["@_name"] : "Ori not found") + "@desc" + key,
+                        const saveKey = (oriItem !== null && oriItem.desc !== undefined ? oriItem.desc["@_name"] : "Ori not found") + "@desc" + key
+                        this.Datas.set(saveKey, {
+                            key: saveKey,
                             category: category,
                             originVersion: oriItem !== null && oriItem.desc !== undefined ? oriItem.desc["@_name"] : "Ori not found",
                             translateVersion: value.desc["@_name"],
@@ -86,8 +87,9 @@ export default class FileData {
 
                     if (value.stats !== undefined) {
                         if (value.stats.tip !== undefined) {
-                            this.Datas.set(key, {
-                                key: ((oriItem !== null && oriItem.stats !== undefined && oriItem.stats.tip !== undefined) ? (typeof oriItem.stats.tip === "string" ? oriItem.stats.tip : oriItem.stats.tip["#text"]) : "Ori not found") + "@tip" + key,
+                            const saveKey = ((oriItem !== null && oriItem.stats !== undefined && oriItem.stats.tip !== undefined) ? (typeof oriItem.stats.tip === "string" ? oriItem.stats.tip : oriItem.stats.tip["#text"]) : "Ori not found") + "@tip" + key
+                            this.Datas.set(saveKey, {
+                                key: saveKey,
                                 category: category,
                                 originVersion: ((oriItem !== null && oriItem.stats !== undefined && oriItem.stats.tip !== undefined) ? (typeof oriItem.stats.tip === "string" ? oriItem.stats.tip : oriItem.stats.tip["#text"]) : "Ori not found"),
                                 translateVersion: value.stats.tip["#text"],
