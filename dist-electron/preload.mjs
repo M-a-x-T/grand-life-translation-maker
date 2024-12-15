@@ -1,4 +1,3 @@
-/* eslint-disable */
 "use strict";
 const electron = require("electron");
 electron.contextBridge.exposeInMainWorld("ipcRenderer", {
