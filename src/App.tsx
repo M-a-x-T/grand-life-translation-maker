@@ -206,6 +206,8 @@ export default function App() {
             return;
         }
 
+        // auto save project when export
+        await handleSaveProject()
 
         await Promise.all(Array.from(projectConfig.Translations.values()).map(
             async (data) => {
