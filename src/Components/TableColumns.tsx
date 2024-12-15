@@ -4,17 +4,8 @@ import DataSourceItem from "../Interfaces/DataSourceItem.ts";
 export default function TableColumns(
     handleCheckboxChange: (key: DataSourceItem, checked: boolean) => void,
     handleIgnoreChange: (key: DataSourceItem, checked: boolean) => void,
-    handleTransOperation: (key: {
-        category: string;
-        isComplete: boolean;
-        isIgnore: boolean;
-        key: string;
-        machineTranslate: string;
-        originVersion: string;
-        sourceFile: string;
-        textPath?: string | undefined;
-        translateVersion: string
-    }) => void
+    handleTransOperation: (key: DataSourceItem) => void,
+    handleUseTransOperation: (key: DataSourceItem) => void
 ) {
     return [
         {
@@ -83,6 +74,18 @@ export default function TableColumns(
                                 }
                             >
                                 Trans
+                            </Button>
+                            <Button
+                                type="text"
+                                onClick={() => handleUseTransOperation(record)
+                                }
+                                style={
+                                    {
+                                        marginRight: 8
+                                    }
+                                }
+                            >
+                                Use Trans
                             </Button>
                         </div>
         },

@@ -330,7 +330,7 @@ export default function App() {
 
         let result = await window.ipcRenderer.invoke('get-env-config', {configName: "YOUDAO_APP_KEY"});
         if (result === undefined) {
-            console.warn(`Failed to read file: ${"YOUDAO_APP_KEY"}`);
+            console.warn(`Failed to read file: YOUDAO_APP_KEY`);
             return;
         }
 
@@ -338,7 +338,7 @@ export default function App() {
 
         result = await window.ipcRenderer.invoke('get-env-config', {configName: "YOUDAO_APP_SECRET"});
         if (result === undefined) {
-            console.warn(`Failed to read file: ${"YOUDAO_APP_SECRET"}`);
+            console.warn(`Failed to read file: YOUDAO_APP_SECRET`);
             return;
         }
 
@@ -361,6 +361,27 @@ export default function App() {
             })
         })
 
+    };
+
+    const handleUseTransOperationChange = async (item: DataSourceItem) => {
+        if (!projectConfig) {
+            return;
+        }
+
+        const fileData = projectConfig.Translations.get(item.sourceFile) as FileData;
+        if (!fileData) {
+            return;
+        }
+
+        fileData.Datas.set(item.key, {
+            ...item,
+            translateVersion: item.machineTranslate
+        });
+
+        // set translation
+        setProjectConfig({
+            ...projectConfig
+        })
     };
 
     const handleCompleteSearchChanged = (e: CheckboxChangeEvent) => {
@@ -416,7 +437,8 @@ export default function App() {
     const columns = TableColumns(
         (item, checked) => handlePropertyCheckChange(item, checked, "isComplete"),
         (item, checked) => handlePropertyCheckChange(item, checked, "isIgnore"),
-        handleTransOperationChange
+        handleTransOperationChange,
+        handleUseTransOperationChange
     ).map((col) => {
         if (!col.editable) {
             return col;
