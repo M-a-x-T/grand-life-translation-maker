@@ -2,9 +2,19 @@
 import DataSourceItem from "../Interfaces/DataSourceItem.ts";
 
 export default function TableColumns(
-    dataSource: DataSourceItem[],
     handleCheckboxChange: (key: DataSourceItem, checked: boolean) => void,
-    handleIgnoreChange: (key: DataSourceItem, checked: boolean) => void
+    handleIgnoreChange: (key: DataSourceItem, checked: boolean) => void,
+    handleTransOperation: (key: {
+        category: string;
+        isComplete: boolean;
+        isIgnore: boolean;
+        key: string;
+        machineTranslate: string;
+        originVersion: string;
+        sourceFile: string;
+        textPath?: string | undefined;
+        translateVersion: string
+    }) => void
 ) {
     return [
         {
@@ -60,12 +70,11 @@ export default function TableColumns(
             dataIndex:
                 'operation',
             render:
-                () =>
-                    dataSource.length >= 1 ?
+                (_value: undefined, record: DataSourceItem) =>
                         <div>
                             <Button
                                 type="text"
-                                onClick={() => console.error("Trans functionality not implemented yet.")
+                                onClick={() => handleTransOperation(record)
                                 }
                                 style={
                                     {
@@ -76,9 +85,6 @@ export default function TableColumns(
                                 Trans
                             </Button>
                         </div>
-                        :
-                        null,
-        }
-        ,
+        },
     ]
 }

@@ -4,6 +4,9 @@ import {fileURLToPath} from 'node:url'
 import path from 'node:path'
 import fs from "fs"
 import SaveFileArgs from "../src/Interfaces/SaveFileArgs.ts";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -71,7 +74,7 @@ app.whenReady().then(createWindow)
 
 ipcMain.handle('save-file', async (event, {data}: { data: SaveFileArgs }) => {
     try {
-        // 打开保存文件对话框
+        // open save file dialog
         let targetFilePath: string = "";
         if (data.displayChoosePathDialog) {
             const {filePath, canceled} = await dialog.showSaveDialog({
@@ -111,7 +114,6 @@ ipcMain.handle('save-file', async (event, {data}: { data: SaveFileArgs }) => {
 
 ipcMain.handle('read-file', async (event, filePath: string) => {
     try {
-        // 读取文件内容
         const fileContent = fs.readFileSync(filePath, 'utf-8');
 
         return {success: true, data: fileContent};
@@ -121,7 +123,6 @@ ipcMain.handle('read-file', async (event, filePath: string) => {
     }
 });
 
-// 获取指定路径下的所有文件
 function getFilesInDirectory(dirPath: string, recursive = false): string[] {
     try {
         const files = fs.readdirSync(dirPath, {withFileTypes: true});
@@ -131,13 +132,13 @@ function getFilesInDirectory(dirPath: string, recursive = false): string[] {
             const fullPath = path.join(dirPath, file.name);
 
             if (file.isDirectory()) {
-                // 如果是文件夹，且需要递归，则进入文件夹
+                // if it's a directory and recursive is true, enter the directory
                 if (recursive) {
                     const subFiles = getFilesInDirectory(fullPath, recursive);
                     allFiles.push(...subFiles);
                 }
             } else {
-                // 如果是文件，则添加到结果
+                // if it's a file, add it to the result
                 allFiles.push(fullPath);
             }
         }
@@ -149,13 +150,31 @@ function getFilesInDirectory(dirPath: string, recursive = false): string[] {
     }
 }
 
-// 主进程接口：处理渲染进程请求
 ipcMain.handle('get-files-in-directory', async (event, {dirPath, recursive = false}) => {
     try {
         const files = getFilesInDirectory(dirPath, recursive);
         return {success: true, files};
     } catch (error) {
         console.error('Error reading directory:', error, event);
+        return {success: false, error: error};
+    }
+});
+
+ipcMain.handle('get-env-config', async (_event, {configName}) => {
+    console.log("try load config: ", configName);
+    return process.env[configName];
+});
+
+ipcMain.handle("fetch", async (_event, {url, options}) => {
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+        const data = await response.json();
+        return {success: true, data};
+    } catch (error) {
+        console.error("Error in API request:", error);
         return {success: false, error: error};
     }
 });

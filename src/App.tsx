@@ -9,6 +9,7 @@ import TableColumns from "./Components/TableColumns.tsx";
 import FileData from "./Configs/FileData.ts";
 import {CheckboxChangeEvent} from "antd/es/checkbox";
 import SaveFileArgs from "./Interfaces/SaveFileArgs.ts";
+import YoudaoTranslator from "./Utils/YoudaoTranslator.ts";
 
 export default function App() {
     const [searchText, setSearchText] = useState("");
@@ -197,6 +198,7 @@ export default function App() {
         }
 
         await SaveProjectDatas(projectConfig, selectedFile)
+        messageApi.success(`Save project success: ${selectedFile}`,);
     }
 
     const handleExportTrans = async (toLocal: boolean) => {
@@ -297,7 +299,7 @@ export default function App() {
         })
     };
 
-    const handleCompleteCheckChange = (item: DataSourceItem, checked: boolean) => {
+    const handlePropertyCheckChange = (item: DataSourceItem, checked: boolean, propertyName: string) => {
         if (!projectConfig) {
             return;
         }
@@ -309,14 +311,14 @@ export default function App() {
 
         fileData.Datas.set(item.key, {
             ...item,
-            isComplete: checked
+            [propertyName]: checked
         });
         setProjectConfig({
             ...projectConfig
         })
     };
 
-    const handleIgnoreCheckChange = (item: DataSourceItem, checked: boolean) => {
+    const handleTransOperationChange = async (item: DataSourceItem) => {
         if (!projectConfig) {
             return;
         }
@@ -326,13 +328,39 @@ export default function App() {
             return;
         }
 
-        fileData.Datas.set(item.key, {
-            ...item,
-            isIgnore: checked
-        });
-        setProjectConfig({
-            ...projectConfig
+        let result = await window.ipcRenderer.invoke('get-env-config', {configName: "YOUDAO_APP_KEY"});
+        if (result === undefined) {
+            console.warn(`Failed to read file: ${"YOUDAO_APP_KEY"}`);
+            return;
+        }
+
+        const appKey = result;
+
+        result = await window.ipcRenderer.invoke('get-env-config', {configName: "YOUDAO_APP_SECRET"});
+        if (result === undefined) {
+            console.warn(`Failed to read file: ${"YOUDAO_APP_SECRET"}`);
+            return;
+        }
+
+        const appSecret = result
+
+        const translator = new YoudaoTranslator(appKey, appSecret);
+
+        // get translation
+        translator.translate(item.originVersion, "en", projectConfig.Language).then((res) => {
+            console.log("result: " + res)
+
+            fileData.Datas.set(item.key, {
+                ...item,
+                machineTranslate: res
+            });
+
+            // set translation
+            setProjectConfig({
+                ...projectConfig
+            })
         })
+
     };
 
     const handleCompleteSearchChanged = (e: CheckboxChangeEvent) => {
@@ -385,7 +413,11 @@ export default function App() {
         },
     };
 
-    const columns = TableColumns(filteredDataSource, handleCompleteCheckChange, handleIgnoreCheckChange).map((col) => {
+    const columns = TableColumns(
+        (item, checked) => handlePropertyCheckChange(item, checked, "isComplete"),
+        (item, checked) => handlePropertyCheckChange(item, checked, "isIgnore"),
+        handleTransOperationChange
+    ).map((col) => {
         if (!col.editable) {
             return col;
         }
